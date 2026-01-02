@@ -1,0 +1,42 @@
+name: solution
+description: "Grok Writing Assistant – Real Webpage Text Selection AI Flow (MVVM + GetX)"
+publish_to: 'none' # Private project – not publishing to pub.dev
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+  flutter: '>=3.22.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management, Navigation, Reactive UI
+  get: ^4.7.3
+
+  # In-App WebView for real webpage browsing & native text selection detection
+  flutter_inappwebview: ^6.1.5  # Latest stable version (critical for Android/iOS stability)
+
+  # Clipboard support for "Copy Result" feature
+  clipboard: ^0.1.3
+
+  # Optional: Cupertino icons for iOS-style icons
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Official Flutter lints for clean, consistent code
+  flutter_lints: ^6.0.0
+
+  # Integration testing support (recommended for future UI tests)
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  # Optional: Add assets folder if you plan to include custom images/icons later
+  # assets:
+  #   - assets/images/
