@@ -6,10 +6,8 @@ import '../widgets/action_button.dart';
 import '../widgets/result_display.dart';
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_strings.dart';
-import '../core/utils/extensions.dart'; // For truncate()
 
 /// Bottom sheet with full AI assistant functionality
-/// Now includes Insert (blue filled) & Replace (outlined) buttons
 class GrokAssistantSheet extends StatelessWidget {
   const GrokAssistantSheet({super.key});
 
@@ -34,41 +32,40 @@ class GrokAssistantSheet extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 20),
-
-                  // Custom prompt input at top
                   CustomTextField(
                     hintText: AppStrings.customPromptHint,
-                    onSubmitted: (v) => v.isNotEmpty ? vm.applyPrompt(v) : null,
+                    onSubmitted: (v) {
+                      if (v.isNotEmpty) vm.applyPrompt(v);
+                    },
                   ),
-
                   const SizedBox(height: 20),
-
-                  // Pre-built prompt buttons
                   Wrap(
                     spacing: 12,
                     runSpacing: 12,
                     children: vm.prebuiltPrompts.map((p) {
-                      return ActionButton(
-                        label: p,
-                        icon: Icons.smart_button,
-                        onTap: () => vm.applyPrompt(p),
+                      final bool isCurrent = p == vm.activePrompt.value;
+                      final bool isLoading = vm.isProcessing.value;
+
+                      return Opacity(
+                        opacity: isLoading && isCurrent ? 0.6 : 1.0,
+                        child: ActionButton(
+                          label: p,
+                          icon: isLoading && isCurrent
+                              ? Icons.hourglass_bottom
+                              : Icons.smart_button,
+                          // Fixed: onTap can be null – no error
+                          onTap: isLoading ? null : () => vm.applyPrompt(p),
+                        ),
                       );
                     }).toList(),
                   ),
-
                   const SizedBox(height: 24),
-
-                  // NEW: Insert & Replace buttons (special design)
                   Row(
                     children: [
-                      // Insert Button – Blue filled
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: () {
-                            // Demo action – can be extended later
-                            Get.snackbar(
-                                'Insert', 'Insert feature coming soon (demo)');
-                          },
+                          onPressed: () => Get.snackbar(
+                              'Insert', 'Insert feature coming soon (demo)'),
                           icon: const Icon(Icons.arrow_downward,
                               color: Colors.white),
                           label: const Text('Insert',
@@ -77,59 +74,36 @@ class GrokAssistantSheet extends StatelessWidget {
                             backgroundColor: AppColors.grokBlue,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                                borderRadius: BorderRadius.circular(12)),
                           ),
                         ),
                       ),
-
                       const SizedBox(width: 16),
-
-                      // Replace Button – Outlined (natural look)
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () {
-                            // Demo action – can be extended later
-                            Get.snackbar('Replace',
-                                'Replace feature coming soon (demo)');
-                          },
+                          onPressed: () => Get.snackbar(
+                              'Replace', 'Replace feature coming soon (demo)'),
                           icon: const Icon(Icons.swap_horiz,
                               color: AppColors.grokBlue),
-                          label: Text('Replace',
+                          label: const Text('Replace',
                               style: TextStyle(color: AppColors.grokBlue)),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             side: const BorderSide(
                                 color: AppColors.grokBlue, width: 2),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                                borderRadius: BorderRadius.circular(12)),
                           ),
                         ),
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 24),
-
-                  // Active prompt chip with ×
-                  if (vm.activePrompt.value.isNotEmpty)
-                    Chip(
-                      label: Text(vm.activePrompt.value),
-                      backgroundColor: AppColors.grokBlue.withOpacity(0.1),
-                      deleteIcon: const Icon(Icons.close, size: 18),
-                      onDeleted: vm.clearActivePrompt,
-                    ),
-
-                  const SizedBox(height: 16),
-
-                  // Processing or Result
                   if (vm.isProcessing.value)
                     const Center(child: CircularProgressIndicator())
                   else if (vm.aiResult.value.isNotEmpty)
                     ResultDisplay(
                         result: vm.aiResult.value, onCopy: vm.copyResult),
-
                   const SizedBox(height: 40),
                 ],
               ),

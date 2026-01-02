@@ -1,28 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/constants/app_colors.dart';
+import '../../viewmodels/web_browser_viewmodel.dart';
 
-/// Reusable floating chip that appears at the top after an action
-/// Shows "[Action] Clicked ×" – matches screenshot exactly
+/// Reusable floating chip shown at top after any prompt action
+/// Displays "[Action] Clicked ×" – exact match to screenshot
 /// Auto-dismisses after 4 seconds or on × tap
 class FloatingActionChip extends StatelessWidget {
-  final String actionText;
-
-  const FloatingActionChip({super.key, required this.actionText});
+  const FloatingActionChip({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final vm = Get.find<WebBrowserViewModel>();
+
     // Auto-dismiss after 4 seconds
     Future.delayed(const Duration(seconds: 4), () {
-      if (Get.isSnackbarOpen || Get.isDialogOpen!) return;
-      Get.closeCurrentSnackbar(); // In case it's shown as snackbar internally
+      if (vm.showActionChip.value) {
+        vm.hideActionChip();
+      }
     });
 
     return SafeArea(
       child: Align(
-        alignment: Alignment.topCenter,
+        alignment: Alignment.bottomCenter,
         child: Padding(
-          padding: const EdgeInsets.only(top: 16.0),
+          padding: const EdgeInsets.only(bottom: 16.0),
           child: Material(
             color: Colors.transparent,
             child: Container(
@@ -41,19 +43,22 @@ class FloatingActionChip extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    '$actionText Clicked',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 15,
-                      color: AppColors.primaryText,
-                    ),
-                  ),
+                  Obx(() => Text(
+                        '${vm.currentActionText.value} Clicked',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 15,
+                          color: AppColors.primaryText,
+                        ),
+                      )),
                   const SizedBox(width: 12),
                   GestureDetector(
-                    onTap: () => Get.back(), // Close the chip
-                    child: const Icon(Icons.close,
-                        size: 20, color: AppColors.primaryText),
+                    onTap: vm.hideActionChip,
+                    child: const Icon(
+                      Icons.close,
+                      size: 20,
+                      color: AppColors.primaryText,
+                    ),
                   ),
                 ],
               ),

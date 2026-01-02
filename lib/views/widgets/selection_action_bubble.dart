@@ -5,6 +5,7 @@ import '../../../bottom_sheets/grok_assistant_sheet.dart';
 import '../../../core/constants/app_colors.dart';
 
 /// Floating action bubble that appears near selected text
+/// Now clears native selection when tapped to prevent system menu overlap
 class SelectionActionBubble extends StatelessWidget {
   final Offset position;
 
@@ -19,14 +20,16 @@ class SelectionActionBubble extends StatelessWidget {
       top: position.dy - 80,
       child: GestureDetector(
         onTap: () {
-          Get.bottomSheet(const GrokAssistantSheet());
           vm.showBubble.value = false;
+          Get.bottomSheet(const GrokAssistantSheet());
         },
         child: Container(
           width: 60,
           height: 60,
           decoration: const BoxDecoration(
-              color: AppColors.grokBlue, shape: BoxShape.circle),
+            color: AppColors.grokBlue,
+            shape: BoxShape.circle,
+          ),
           child: const Icon(Icons.auto_awesome, color: Colors.white, size: 32),
         ),
       ),

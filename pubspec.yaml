@@ -38,5 +38,5 @@ flutter:
   uses-material-design: true
 
   # Optional: Add assets folder if you plan to include custom images/icons later
-  # assets:
-  #   - assets/images/
+  assets:
+    - assets/button.png

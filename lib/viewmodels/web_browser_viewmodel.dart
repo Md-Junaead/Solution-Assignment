@@ -5,7 +5,6 @@ import '../../services/ai_service.dart';
 import '../../core/constants/app_strings.dart';
 
 /// Core ViewModel managing the entire text selection → AI flow
-/// Uses reactive state (GetX) for bubble visibility, selected text, result, etc.
 class WebBrowserViewModel extends GetxController {
   final AIService _aiService = AIService();
 
@@ -17,7 +16,11 @@ class WebBrowserViewModel extends GetxController {
   final RxBool showBubble = false.obs;
   final RxBool isProcessing = false.obs;
 
-  // Pre-built prompts list
+  // Floating action chip state
+  final RxString currentActionText = ''.obs;
+  final RxBool showActionChip = false.obs;
+
+  // Pre-built prompts
   final List<String> prebuiltPrompts = [
     AppStrings.improveWriting,
     AppStrings.summarize,
@@ -26,7 +29,6 @@ class WebBrowserViewModel extends GetxController {
     AppStrings.plagiarismCheck,
   ];
 
-  /// Called when text is selected via JS
   void onTextSelected(String text, Offset position) {
     if (text.trim().isNotEmpty) {
       selectedText.value = text.trim();
@@ -35,44 +37,62 @@ class WebBrowserViewModel extends GetxController {
     }
   }
 
-  /// Clear all selection state
   void clearSelection() {
     selectedText.value = '';
     activePrompt.value = '';
     aiResult.value = '';
     showBubble.value = false;
     bubblePosition.value = null;
+    hideActionChip();
   }
 
-  /// Apply a prompt (pre-built or custom)
-  Future<void> applyPrompt(String prompt) async {
-    if (selectedText.value.isEmpty) return;
+  /// Synchronous entry point for UI buttons
+  /// Safe to use with VoidCallback
+  void applyPrompt(String prompt) {
+    if (selectedText.value.isEmpty || isProcessing.value) return;
 
+    // Update UI state immediately
+    currentActionText.value = prompt;
+    showActionChip.value = true;
     activePrompt.value = prompt;
     isProcessing.value = true;
 
+    // Close bottom sheet
+    if (Get.isBottomSheetOpen!) Get.back();
+
+    // Fire-and-forget async processing
+    _runAiProcessing(prompt);
+  }
+
+  /// Private async method – does the actual AI call
+  Future<void> _runAiProcessing(String prompt) async {
     try {
       final result = await _aiService.processPrompt(selectedText.value, prompt);
       aiResult.value = result;
     } catch (e) {
       aiResult.value = 'Error processing request. Please try again.';
+      Get.snackbar('Error', 'AI processing failed');
     } finally {
       isProcessing.value = false;
     }
   }
 
-  /// Copy AI result to clipboard
   void copyResult() {
     if (aiResult.value.isNotEmpty) {
       FlutterClipboard.copy(aiResult.value).then((_) {
-        Get.snackbar('Copied', AppStrings.copied, duration: const Duration(seconds: 2));
+        Get.snackbar('Copied', AppStrings.copied,
+            duration: const Duration(seconds: 2));
       });
     }
   }
 
-  /// Remove active prompt chip
   void clearActivePrompt() {
     activePrompt.value = '';
     aiResult.value = '';
+  }
+
+  void hideActionChip() {
+    showActionChip.value = false;
+    currentActionText.value = '';
   }
 }

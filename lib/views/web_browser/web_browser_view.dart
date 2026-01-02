@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/Get.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:solution/views/widgets/selection_action_bubble.dart';
 import '../../viewmodels/web_browser_viewmodel.dart';
+import '../../widgets/floating_action_chip.dart'; // NEW import
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 
@@ -26,7 +27,6 @@ class WebBrowserView extends StatelessWidget {
                 url: WebUri('https://en.wikipedia.org/wiki/Grammar')),
             initialSettings: InAppWebViewSettings(
               javaScriptEnabled: true,
-              // Fixed: Correct setting name in flutter_inappwebview ^6.0.0+
               useHybridComposition: true,
             ),
             onLoadStop: (controller, url) async {
@@ -61,9 +61,14 @@ class WebBrowserView extends StatelessWidget {
             },
           ),
 
-          // Dynamic bubble overlay – now correctly imported
+          // Selection bubble
           Obx(() => vm.showBubble.value
               ? SelectionActionBubble(position: vm.bubblePosition.value!)
+              : const SizedBox.shrink()),
+
+          // NEW: Floating action chip at top
+          Obx(() => vm.showActionChip.value
+              ? const FloatingActionChip()
               : const SizedBox.shrink()),
         ],
       ),
